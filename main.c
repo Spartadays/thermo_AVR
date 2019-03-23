@@ -6,8 +6,43 @@
  */
 #include "main.h"
 
+void ADC_Init()
+{
+	//---ADMUX---:
+	{
+		//[7,6] REFSn - Vref selection: (avcc)
+		CLEARBIT(ADMUX, REFS1);
+		SETBIT(ADMUX, REFS0);
+		//[5] ADLAR - ADC Left Adjust Result: (off)
+		CLEARBIT(ADMUX, ADLAR);
+		//[3, 2, 1, 0] MUXn - Analog channel selection: (ADC5)
+		CLEARBIT(ADMUX, MUX3);
+		SETBIT(ADMUX, MUX2);
+		CLEARBIT(ADMUX, MUX1);
+		SETBIT(ADMUX, MUX0);
+	}
+	//---ADCSRA---:
+	{
+		//[7] ADEN - ADC enable: (on)
+		SETBIT(ADCSRA, ADEN);
+		//[6] ADSC - ADC start conversion: (off)
+		CLEARBIT(ADCSRA, ADSC);
+		//[5] ADFR - ADC free running select: (off)
+		CLEARBIT(ADCSRA, ADFR);
+		//[4] ADIF - ADC interrupt flag (check)
+		//[3] ADIE - ADC interrupt enable: (off)
+		CLEARBIT(ADCSRA, ADIE);
+		//[2, 1, 0] ADPSn - ADC prescaler select: (128)
+		SETBIT(ADCSRA, ADPS2);
+		SETBIT(ADCSRA, ADPS1);
+		SETBIT(ADCSRA, ADPS0);
+	}
+}
+
 int main()
 {
+	int temp_val = 0;
+
 	//PIN SETUP:
 	PIN_OUTPUT(B, 0);  //disp 6
 	PIN_OUTPUT(B, 1);  //disp 8
@@ -26,13 +61,22 @@ int main()
 	PIN_OUTPUT(D, 5);  //disp 1
 	PIN_OUTPUT(D, 6);  //disp 2
 	PIN_OUTPUT(D, 7);  //disp 3
+	//----
+	ADC_Init();
+	//NOP:
 	_NOP();
 	//----
 	send_reg_to_led(0x00, 0x00);  //clear leds
+	//led_startup_test();
+	SETBIT(ADCSRA, ADSC); //start conversion
 	//LOOP:
 	while(1)
 	{
-		led_startup_test();
+		while(CHECKBIT(ADCSRA, ADSC)) {};
+		temp_val = ADC/2;
+		send_number_to_led(temp_val);
+		SETBIT(ADCSRA, ADSC); //start conversion
+		_delay_ms(500);
 	}
 	//----
 	return 0;
