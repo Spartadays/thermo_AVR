@@ -137,7 +137,7 @@ void send_number_to_led(char two_digit_number)
 					dig_to_reg(num_to_dig(two_digit_number).dR));
 }
 
-void led_startup_test()
+void led_startup_short_test()
 {
 	send_reg_to_led(ERROR, ERROR);
 	_delay_ms(500);
@@ -151,7 +151,11 @@ void led_startup_test()
 	send_reg_to_led(0xFF, 0xFF);
 	_delay_ms(250);
 	send_reg_to_led(0x00, 0x00);
+}
 
+void led_startup_test()
+{
+	led_startup_short_test();
 	for (char var = 0; var <= 99; var++)
 	{
 		send_number_to_led(var);

@@ -61,6 +61,7 @@ char dig_to_reg(char dig);
 void send_reg_to_led(char regL, char regR);
 void send_number_to_led(char two_digit_number);
 
+void led_startup_short_test();
 void led_startup_test();
 
 #endif /* TWODIGITSEVENSEGMENT_H_ */

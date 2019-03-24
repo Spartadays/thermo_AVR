@@ -6,6 +6,8 @@
  */
 #include "main.h"
 
+#define N 100
+
 void ADC_Init()
 {
 	//---ADMUX---:
@@ -41,8 +43,8 @@ void ADC_Init()
 
 int main()
 {
-	int temp_val = 0;
-
+	int temp_val[N];
+	long sum = 0;
 	//PIN SETUP:
 	PIN_OUTPUT(B, 0);  //disp 6
 	PIN_OUTPUT(B, 1);  //disp 8
@@ -67,16 +69,25 @@ int main()
 	_NOP();
 	//----
 	send_reg_to_led(0x00, 0x00);  //clear leds
-	//led_startup_test();
+	led_startup_short_test();
 	SETBIT(ADCSRA, ADSC); //start conversion
 	//LOOP:
 	while(1)
 	{
-		while(CHECKBIT(ADCSRA, ADSC)) {};
-		temp_val = ADC/2;
-		send_number_to_led(temp_val);
-		SETBIT(ADCSRA, ADSC); //start conversion
-		_delay_ms(500);
+		for (int i = 0; i <= (N-1); i++)
+		{
+			while(CHECKBIT(ADCSRA, ADSC)) {};
+			temp_val[i] = ADC;
+			_delay_ms(10);
+			SETBIT(ADCSRA, ADSC); //start conversion
+		}
+		for (int var = 0; var <= (N-1); var++)
+		{
+			sum = sum + temp_val[var];
+			temp_val[var] = 0;
+		}
+		send_number_to_led(sum/(N*2));
+		sum = 0;
 	}
 	//----
 	return 0;
